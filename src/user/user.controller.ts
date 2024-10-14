@@ -1,5 +1,6 @@
-import { Controller, Post, Body, Get, Param } from '@nestjs/common'
+import { Controller, Post, Body, Get, Param, UseGuards, HttpCode, Req } from '@nestjs/common'
 import { UserService } from './user.service'
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('users')
 export class UserController {
@@ -13,5 +14,13 @@ export class UserController {
   @Get(':id')
   async getUserById(@Param('id') id: number) {
     return this.userService.findById(id)
+  }
+
+  @UseGuards(JwtAuthGuard)  
+  @Post('logout')
+  @HttpCode(204)  
+  async logout(@Req() req: Request): Promise<void> {
+    const user = req["user"];  
+    return await this.userService.logout(user.id);
   }
 }
